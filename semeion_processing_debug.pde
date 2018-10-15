@@ -1,5 +1,3 @@
-
-
 // Example by Tom Igoe
 
 import processing.serial.*;
@@ -30,7 +28,8 @@ boolean showFilled = false;
 int  numberOfTests = 10, sensorThreshold = 8;
 float threshold, previousThreshold;
 boolean sensorCalibrated;
-
+float newAvrg;
+ 
 color bgColor;
 
 void setup() {
@@ -55,7 +54,8 @@ void setup() {
   myString = myPort.readStringUntil(lf);
   myString = null;
 
-  size(600, 300);
+  //size(600, 300);
+  fullScreen();
 
   // We also get the bias, peak and spectrumstart, so we add these two
   data = new int[spectrumSteps + extraDataCount];
@@ -144,14 +144,14 @@ void draw() {
     avrgAvrg = GetAverageAverage(movingAvrg);
     float avrgY = MapToGraph(avrgAvrg);
     line(0, avrgY, width, avrgY);
-    fill(255);
-    float newAvrg;
+   
     if(abs(avrgAvrg-threshold) > 0.5){
       newAvrg= abs(avrgAvrg-threshold);
     }
     else{
       newAvrg = 0;
     }
+    fill(0,200,0);
     text(newAvrg, 0, avrgY);
     if(newAvrg < 75) {
       float tempBgMap = map(newAvrg, 0, 30, 0, 255);
@@ -162,10 +162,21 @@ void draw() {
     }
   }
   
+  if(!sensorCalibrated) {
+    bgColor = color(255, 0, 0);
+  }
+  
   if(millis()%10000<1000 && !sensorCalibrated){
     calibrateSensor();
     sensorCalibrated = true;
   }
+  
+  if(keyPressed) {
+    if(key == 'c' || key == 'C') {
+      sensorCalibrated = false;
+    }
+  }
+  
 }
 
 float MapToGraph(float num) {
@@ -201,6 +212,5 @@ void calibrateSensor() {
   }
   float calibratedAverage = vals / numberOfTests;
   threshold = calibratedAverage;
-  println(threshold);
 
 }
